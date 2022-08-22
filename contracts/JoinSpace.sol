@@ -72,7 +72,7 @@ contract JoinSpace {
     }
 
     function sendWinnerToken(address _id) private {
-        // send user ETH if won
+        // send user ETH token if won
         console.log("sending user %s eth", _id);
     }
 
