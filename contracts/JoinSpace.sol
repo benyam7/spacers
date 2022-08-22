@@ -32,14 +32,22 @@ contract JoinSpace {
         console.log("Welcome to the world of spacers!");
     }
 
-    // related with user joinin comunity of spacers for firstime
+    //  RELATED with user joinin comunity of spacers for firstime
     function joinSpace(Spacer memory _spacer) public {
         spacers.push(_spacer);
         totalSpacers += 1;
         updateCountryToSpacers(_spacer.countryEmoji);
-
-        console.log("%s has joined the space! ", _spacer.id);
-        console.log("We have reached %d spacers", totalSpacers);
+        console.log(
+            "%s has joined the space! reacted with emoji: %s from %s.",
+            _spacer.id,
+            _spacer.feelingEmoji,
+            _spacer.countryEmoji
+        );
+        console.log(
+            "Btw, here is your status of wining NFT or ETH is ===> %s, and your win type is ===> %s",
+            getWinStatusString(_spacer.status),
+            getWinTypeString(_spacer.winType)
+        );
     }
 
     function getTotalSpacers() public view returns (uint256) {
@@ -51,7 +59,7 @@ contract JoinSpace {
         countryToSpacerCount[_country] += 1;
     }
 
-    // related wit sending spacer prize (below)
+    // RELATED: wit sending spacer prize (below)
     function getNFTIPFSLink() public returns (string memory) {
         // return url of IPFS for associated NFT
         console.log("some ipfs url for NFT won");
@@ -68,7 +76,7 @@ contract JoinSpace {
         console.log("sending user %s eth", _id);
     }
 
-    // related wit choosing a winner (and below)
+    // RELATED wit choosing a winner (and below)
     function random() private view returns (uint) {
         // sha3 and now have been deprecated
         return
@@ -78,13 +86,13 @@ contract JoinSpace {
         // convert hash to integer
     }
 
-    function decidePrizeType() private view returns (string memory) {
+    function decidePrizeType() private view returns (WinType) {
         // randomly decide user to win NFT or Token in (ETH)
         uint256 value = random() % 100;
         if (value == 7) {
-            return "WinType.NFT"; // i am tryin to make NFTs a scares, so there will be a higher demand. I think it makes sense.
+            return WinType.NFT; // i am tryin to make NFTs a scares, so there will be a higher demand. I think it makes sense.
         } else {
-            return "WinType.ETH";
+            return WinType.ETH;
         }
     }
 
@@ -102,7 +110,7 @@ contract JoinSpace {
         // logic inside your smartcontract, bcz it's deterministic
         uint256 winner_index = random() % spacers.length;
         winner = spacers[winner_index];
-        if (compareStrings(decidePrizeType(), "WinType.ETH")) {
+        if (decidePrizeType() == WinType.ETH) {
             sendWinnerToken(winner.id);
         } else {
             sendWinnerNFT(winner.id);
@@ -117,12 +125,28 @@ contract JoinSpace {
         hasAlreadyWonPrize[_id] = true;
     }
 
-    function compareStrings(string memory a, string memory b)
-        private
-        pure
-        returns (bool)
-    {
-        return (keccak256(abi.encodePacked((a))) ==
-            keccak256(abi.encodePacked((b))));
+    // TODO: find better way to do this
+    function getWinTypeString(
+        WinType _winType // it's not view bcz it is not readin from blockchain
+    ) private pure returns (string memory) {
+        if (_winType == WinType.NFT) {
+            return "NFT";
+        } else if (_winType == WinType.ETH) {
+            return "ETH";
+        } else {
+            return "Not determined!";
+        }
+    }
+
+    function getWinStatusString(
+        WinStatus _winStatus // it's not view bcz it is not readin from blockchain
+    ) private pure returns (string memory) {
+        if (_winStatus == WinStatus.PENDING) {
+            return "PENDING";
+        } else if (_winStatus == WinStatus.WON) {
+            return "WON";
+        } else {
+            return "LOST";
+        }
     }
 }

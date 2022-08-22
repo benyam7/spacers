@@ -17,15 +17,16 @@ const main = async () => {
     // string date; // Thur, Aug 08, 2022 at 2:00 PM UTC
     // WinStatus status;
     // WinType winType;
-    const PENDING = "PENDING"
-    const ETH = "ETH'"
+    const PENDING = hre.ethers.BigNumber.from("0"); // PENDING
+    const NOT_DETERMINED = hre.ethers.BigNumber.from("2") // NOT_DETERMINED
+
     let joinSpaceTx = await joinSpaceContract.joinSpace({
         id: owner.address,
         feelingEmoji: "happy", // figure how u can store feelin emojis
-        countryEmoji: "ET", 
+        countryEmoji: "ET",
         date: "Aug 19, 2022 at 6:40 PM",
         status: PENDING,
-        winType: ETH
+        winType: NOT_DETERMINED
     });
     await joinSpaceTx.wait(); // i think we're waiting for it because, and this function changes state of the blockchain
 
@@ -35,13 +36,13 @@ const main = async () => {
     let joinSpaceTx2 = await joinSpaceContract.joinSpace({
         id: randomPerson.address,
         feelingEmoji: "happy", // figure how u can store feelin emojis
-        countryEmoji: "ET", 
+        countryEmoji: "US",
         date: "Aug 19, 2022 at 6:40 PM",
         status: PENDING,
-        winType: ETH
+        winType: NOT_DETERMINED
     })
     await joinSpaceTx2.wait();
-    
+
     totalSpacers = await joinSpaceContract.getTotalSpacers();
 }
 
@@ -52,7 +53,7 @@ const runMain = async () => {
     } catch(error){
         console.log(error);
         process.exit(1) // exit node process while indicatin 'Uncaught fatal exception' error
-    
+
     }
 }
 

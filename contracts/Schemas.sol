@@ -25,6 +25,6 @@ struct Spacer {
     string feelingEmoji;
     string countryEmoji;
     string date; // Thur, Aug 08, 2022 at 2:00 PM UTC
-    string status; // TODO: till i resolve the issue of callin it in hardhat
-    string winType;
+    WinStatus status;
+    WinType winType;
 }
