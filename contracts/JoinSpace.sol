@@ -12,6 +12,8 @@ contract JoinSpace {
     mapping(address => bool) hasAlreadyParticipated;
     Spacer[] spacers;
 
+    event NewSpacer(address indexed id, uint256 timestamp, string countryEmoji);
+
     modifier checkIfAlreadyWonPrize() {
         require(
             hasAlreadyWonPrize[msg.sender],
@@ -37,6 +39,7 @@ contract JoinSpace {
         spacers.push(_spacer);
         totalSpacers += 1;
         updateCountryToSpacers(_spacer.countryEmoji);
+        emit NewSpacer(_spacer.id, block.timestamp, _spacer.countryEmoji);
         console.log(
             "%s has joined the space! reacted with emoji: %s from %s.",
             _spacer.id,
@@ -53,6 +56,10 @@ contract JoinSpace {
     function getTotalSpacers() public view returns (uint256) {
         console.log("We have %d total spacers!", totalSpacers);
         return totalSpacers;
+    }
+
+    function getSpacersArray() public view returns (Spacer[] memory) {
+        return spacers;
     }
 
     function updateCountryToSpacers(string memory _country) private {

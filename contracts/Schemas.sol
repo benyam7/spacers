@@ -13,7 +13,6 @@ enum WinType {
 }
 struct NFT {
     string urlIPFS;
-    Spacer spacer;
 }
 struct ETH {
     uint256 amount;
