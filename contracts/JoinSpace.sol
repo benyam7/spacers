@@ -25,8 +25,10 @@ contract JoinSpace {
     }
 
     modifier checkIfAlreadyParticipated(address id) {
+        console.log("checking participation %s", id);
+        console.log(hasAlreadyParticipated[id]);
         require(
-            hasAlreadyParticipated[id],
+            !hasAlreadyParticipated[id],
             "You have already participated! You cannot spam the system!"
         );
         _;

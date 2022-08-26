@@ -9,7 +9,7 @@ const main = async () => {
     "JoinSpace"
   );
   const joinSpaceContract = await joinSpaceContractFactory.deploy({
-    value: hre.ethers.utils.parseEther("0.001"),
+    value: hre.ethers.utils.parseEther("0.1"),
   });
 
   await joinSpaceContract.deployed();
