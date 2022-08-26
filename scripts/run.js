@@ -2,20 +2,25 @@ const main = async () => {
   const [owner, randomPerson] = await hre.ethers.getSigners();
   // how is hre imported? everytime npx hardhat, you're getting the hre object built on the fly usin the hardhat.confi.js
   const joinSpaceFactory = await hre.ethers.getContractFactory("JoinSpace"); // compiles our contract, and generates neccessary files in artifact director
-  const joinSpaceContract = await joinSpaceFactory.deploy(); // hard hat will create a new local etheeum network for us, but only for this contract.After, script complete it will be destroyed. so, everytime we run our contract, it's run on fresh blockchain
+  const joinSpaceContract = await joinSpaceFactory.deploy({
+    value: hre.ethers.utils.parseEther("0.1"),
+  }); // hard hat will create a new local etheeum network for us, but only for this contract.After, script complete it will be destroyed. so, everytime we run our contract, it's run on fresh blockchain
   await joinSpaceContract.deployed(); // wait utill our contract is deployed
 
   console.log("Contract deployed to: ", joinSpaceContract.address);
   console.log("Contract deployed by", owner.address);
 
+  let contractBalance = await hre.ethers.provider.getBalance(
+    joinSpaceContract.address
+  );
+  console.log(
+    "Contract balance",
+    hre.ethers.utils.formatEther(contractBalance)
+  );
+
   let totalSpacers;
   totalSpacers = await joinSpaceContract.getTotalSpacers(); // we're not waitin for it like one below, cause it's view function i.e doesn't change state of deve
-  // address id;
-  // string feelingEmoji;
-  // string countryEmoji;
-  // string date; // Thur, Aug 08, 2022 at 2:00 PM UTC
-  // WinStatus status;
-  // WinType winType;
+
   const PENDING = hre.ethers.BigNumber.from("0"); // PENDING
   const NOT_DETERMINED = hre.ethers.BigNumber.from("2"); // NOT_DETERMINED
 
@@ -30,7 +35,14 @@ const main = async () => {
   await joinSpaceTx.wait(); // i think we're waiting for it because, and this function changes state of the blockchain
 
   totalSpacers = await joinSpaceContract.getTotalSpacers();
+  contractBalance = await hre.ethers.provider.getBalance(
+    joinSpaceContract.address
+  );
 
+  console.log(
+    "Contract balance",
+    hre.ethers.utils.formatEther(contractBalance)
+  );
   // add other persons to wave, (in our case we're gettin a random address, and using that to mimic other people waving)
   let joinSpaceTx2 = await joinSpaceContract.joinSpace({
     id: randomPerson.address,
@@ -43,7 +55,14 @@ const main = async () => {
   await joinSpaceTx2.wait();
 
   totalSpacers = await joinSpaceContract.getTotalSpacers();
+  contractBalance = await hre.ethers.provider.getBalance(
+    joinSpaceContract.address
+  );
 
+  console.log(
+    "Contract balance",
+    hre.ethers.utils.formatEther(contractBalance)
+  );
   const spacersArray = await joinSpaceContract.getSpacersArray();
   console.log("spacers array ", spacersArray);
 

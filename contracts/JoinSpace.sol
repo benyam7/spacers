@@ -30,7 +30,7 @@ contract JoinSpace {
         _;
     }
 
-    constructor() {
+    constructor() payable {
         console.log("Welcome to the world of spacers!");
     }
 
@@ -51,6 +51,14 @@ contract JoinSpace {
             getWinStatusString(_spacer.status),
             getWinTypeString(_spacer.winType)
         );
+
+        uint256 prizeAmount = 0.0001 ether;
+        require(
+            prizeAmount <= address(this).balance,
+            "Bro your contract has less than prize value :D"
+        );
+        (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+        require(success, "Failed to withdraw money from contract");
     }
 
     function getTotalSpacers() public view returns (uint256) {
