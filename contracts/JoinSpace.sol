@@ -12,8 +12,10 @@ contract JoinSpace {
     mapping(address => bool) hasAlreadyParticipated;
     Spacer[] spacers;
 
-    event NewSpacer(address indexed id, uint256 timestamp, string countryEmoji);
+    uint256 private seed;
 
+    event NewSpacer(address indexed id, uint256 timestamp, string countryEmoji);
+    event NewWinner(address indexed id);
     modifier checkIfAlreadyWonPrize() {
         require(
             hasAlreadyWonPrize[msg.sender],
@@ -22,20 +24,25 @@ contract JoinSpace {
         _;
     }
 
-    modifier checkIfAlreadyParticipated() {
+    modifier checkIfAlreadyParticipated(address id) {
         require(
-            hasAlreadyParticipated[msg.sender],
-            "You have already participated!"
+            hasAlreadyParticipated[id],
+            "You have already participated! You cannot spam the system!"
         );
         _;
     }
 
     constructor() payable {
+        // set initial seed
+        seed = (block.timestamp + block.difficulty) % 100;
         console.log("Welcome to the world of spacers!");
     }
 
     //  RELATED with user joinin comunity of spacers for firstime
-    function joinSpace(Spacer memory _spacer) public {
+    function joinSpace(Spacer memory _spacer)
+        public
+        checkIfAlreadyParticipated(_spacer.id)
+    {
         spacers.push(_spacer);
         totalSpacers += 1;
         updateCountryToSpacers(_spacer.countryEmoji);
@@ -51,14 +58,32 @@ contract JoinSpace {
             getWinStatusString(_spacer.status),
             getWinTypeString(_spacer.winType)
         );
+        // block.difficulty tells miners how hard the block will be to mine based on the transactions in the block.
+        // blocks get harder for number of reasons, but mainly they get arader when there are more transactions in the block(some miners
+        // preffer easier blocks, but, these payout less)
 
-        uint256 prizeAmount = 0.0001 ether;
-        require(
-            prizeAmount <= address(this).balance,
-            "Bro your contract has less than prize value :D"
-        );
-        (bool success, ) = (msg.sender).call{value: prizeAmount}("");
-        require(success, "Failed to withdraw money from contract");
+        // block.timestamp: is just the unix timestamp that the block is being processed.
+        //  block.timestamp and block.difficulty are pretty random but they could be controlled by a sophiscated attacer.
+        // to add difficulty on this we're changing `seed` whenever new spacers joins the club. And we're combining the previous `seed`,
+        // difficulty and timestamp. (attacker could technically game this system, if they really wanted to. it's just hard.hi)
+        // generate a new seed for the next user that joins the space
+        seed = (block.difficulty + block.timestamp + seed) % 100;
+
+        console.log("Random number jenerated: %d", seed);
+        updateHasAlreadyParticipated(_spacer.id);
+        // if 2% chance that user wins prize
+        if (seed < 2) {
+            console.log("%s won!", _spacer.id);
+            uint256 prizeAmount = 0.0001 ether;
+            require(
+                prizeAmount <= address(this).balance,
+                "Bro your contract has less than prize value :D"
+            );
+            (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+            require(success, "Failed to withdraw money from contract");
+            emit NewWinner(_spacer.id);
+            updateHasAlreadyParticipated(_spacer.id);
+        }
     }
 
     function getTotalSpacers() public view returns (uint256) {
@@ -113,7 +138,7 @@ contract JoinSpace {
 
     function getARandomWinner()
         private
-        checkIfAlreadyParticipated
+        // checkIfAlreadyParticipated
         checkIfAlreadyWonPrize
     {
         if (spacers.length < 100) {

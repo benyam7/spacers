@@ -10,6 +10,8 @@ const main = async () => {
   console.log("Contract deployed to: ", joinSpaceContract.address);
   console.log("Contract deployed by", owner.address);
 
+  console.log("rand person", randomPerson.address);
+
   let contractBalance = await hre.ethers.provider.getBalance(
     joinSpaceContract.address
   );
@@ -44,9 +46,9 @@ const main = async () => {
     hre.ethers.utils.formatEther(contractBalance)
   );
   // add other persons to wave, (in our case we're gettin a random address, and using that to mimic other people waving)
-  let joinSpaceTx2 = await joinSpaceContract.joinSpace({
+  let joinSpaceTx2 = await joinSpaceContract.connect(randomPerson).joinSpace({
     id: randomPerson.address,
-    feelingEmoji: "happy", // figure how u can store feelin emojis
+    feelingEmoji: "happy", // figure how u can store f eelin emojis
     countryEmoji: "US",
     date: "Aug 19, 2022 at 6:40 PM",
     status: PENDING,
@@ -64,7 +66,7 @@ const main = async () => {
     hre.ethers.utils.formatEther(contractBalance)
   );
   const spacersArray = await joinSpaceContract.getSpacersArray();
-  console.log("spacers array ", spacersArray);
+  // console.log("spacers array ", spacersArray);
 
   // listen to the event (not sure)
   //   joinSpaceContract.on("NewSpacer", (setter, newSpacer) => {
